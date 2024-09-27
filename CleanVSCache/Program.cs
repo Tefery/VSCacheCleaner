@@ -14,8 +14,15 @@ namespace LimpiarCacheVisualStudio
             if (!EsAdministrador())
             {
                 Console.WriteLine("Se requieren permisos de administrador. Solicitando elevación...");
-                ReiniciarComoAdministrador();
+                ReiniciarComoAdministrador(args);
                 return;
+            }
+
+            bool saltarConfirmaciones = false;
+
+            if (args.Length > 0)
+            {
+                saltarConfirmaciones = args.Any(x => string.Equals(x, "-y", StringComparison.InvariantCultureIgnoreCase));
             }
 
             string carpetaAppDataVS = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\VisualStudio");
@@ -87,8 +94,11 @@ namespace LimpiarCacheVisualStudio
                 }
             }
 
-            Console.WriteLine("Limpieza completada. Presiona cualquier tecla para salir.");
-            Console.ReadKey();
+            if (!saltarConfirmaciones)
+            {
+                Console.WriteLine("Limpieza completada. Presiona cualquier tecla para salir.");
+                Console.ReadKey();
+            }
         }
 
         static bool EsAdministrador()
@@ -99,14 +109,14 @@ namespace LimpiarCacheVisualStudio
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
-
-        static void ReiniciarComoAdministrador()
+        static void ReiniciarComoAdministrador(string[] args)
         {
             ProcessStartInfo info = new ProcessStartInfo
             {
                 FileName = Process.GetCurrentProcess().MainModule.FileName,
                 UseShellExecute = true,
-                Verb = "runas"
+                Verb = "runas",
+                Arguments = string.Join(" ", args.Select(a => $"\"{a}\""))
             };
 
             try
