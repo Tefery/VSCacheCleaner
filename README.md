@@ -7,4 +7,5 @@ Clean all cache of Visual Studio in one click
 
 ## Input parameters
 
-- "-Y" for skipping confirmations
+- "-Y" (YES) for skipping confirmations
+- "-IO" (IGNORE OUTPUT) for ignoring output msgs that may slow the ejecution
