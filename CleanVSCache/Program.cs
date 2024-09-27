@@ -8,21 +8,24 @@ namespace LimpiarCacheVisualStudio
 {
     class Program
     {
+
+        static bool saltarConfirmaciones = false;
+        static bool ignoreOutput = true;
+
         static void Main(string[] args)
         {
             // Verificar si se ejecuta como administrador
             if (!EsAdministrador())
             {
-                Console.WriteLine("Se requieren permisos de administrador. Solicitando elevación...");
+                print("Se requieren permisos de administrador. Solicitando elevación...");
                 ReiniciarComoAdministrador(args);
                 return;
             }
 
-            bool saltarConfirmaciones = false;
-
             if (args.Length > 0)
             {
                 saltarConfirmaciones = args.Any(x => string.Equals(x, "-y", StringComparison.InvariantCultureIgnoreCase));
+                ignoreOutput = args.Any(x => string.Equals(x, "-io", StringComparison.InvariantCultureIgnoreCase));
             }
 
             string carpetaAppDataVS = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\VisualStudio");
@@ -36,7 +39,7 @@ namespace LimpiarCacheVisualStudio
 
             string[] subcarpetas = Directory.GetDirectories(carpetaAppDataVS);
 
-            Console.WriteLine("\nCarpetas que coinciden con el patrón:");
+            print("\nCarpetas que coinciden con el patrón:");
             foreach (string subcarpeta in subcarpetas)
             {
                 string nombreCarpeta = Path.GetFileName(subcarpeta);
@@ -54,11 +57,11 @@ namespace LimpiarCacheVisualStudio
                 try
                 {
                     file.Delete();
-                    Console.WriteLine($"Eliminado: {file.FullName}");
+                    print($"Eliminado: {file.FullName}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error al eliminar {file.FullName}: {ex.Message}");
+                    print($"Error al eliminar {file.FullName}: {ex.Message}");
                 }
             }
             foreach (DirectoryInfo dir in di.EnumerateDirectories())
@@ -66,11 +69,11 @@ namespace LimpiarCacheVisualStudio
                 try
                 {
                     dir.Delete(true);
-                    Console.WriteLine($"Eliminado: {dir.FullName}");
+                    print($"Eliminado: {dir.FullName}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error al eliminar {dir.FullName}: {ex.Message}");
+                    print($"Error al eliminar {dir.FullName}: {ex.Message}");
                 }
             }
 
@@ -81,16 +84,16 @@ namespace LimpiarCacheVisualStudio
                     try
                     {
                         Directory.Delete(ruta, true);
-                        Console.WriteLine($"Eliminado: {ruta}");
+                        print($"Eliminado: {ruta}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error al eliminar {ruta}: {ex.Message}");
+                        print($"Error al eliminar {ruta}: {ex.Message}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Directorio no encontrado: {ruta}");
+                    print($"Directorio no encontrado: {ruta}");
                 }
             }
 
@@ -99,6 +102,12 @@ namespace LimpiarCacheVisualStudio
                 Console.WriteLine("Limpieza completada. Presiona cualquier tecla para salir.");
                 Console.ReadKey();
             }
+        }
+
+        static void print(string msg)
+        {
+            if (!ignoreOutput)
+                Console.WriteLine(msg);
         }
 
         static bool EsAdministrador()
